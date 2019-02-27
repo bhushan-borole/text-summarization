@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="{{ url_for('static', filename='css/mdb.min.css') }}" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<style type="text/css">
+	 textarea{
+		width: 25%;
+	}
+</style>
+
+<body>
+	<form action="/summarize" method="post" >
+	<table style="width:100%; margin-top: 15%;">
+		<tr>
+			<th></th>
+			<th></th>
+			<th></th>
+		</tr>
+		<tr>
+			
+				<td style="width: 45%">
+					<div class="md-form mb-4 pink-textarea active-pink-textarea" style="width: 80%; margin-left: 50px;">
+					    <i class="fas fa-angle-double-right prefix"></i>
+					    <textarea type="text" id="text" name="text" class="md-textarea form-control" rows="5"></textarea>
+					    <label for="form21" style="font-size: 20px;">Enter Text Article</label>
+				    </div>
+				</td>
+				<td>
+					<input type="submit" name="submit" value="submit" class="btn btn-primary">
+				</td>
+			
+			
+			<td style="padding-left: 50px;padding-bottom: 80px;">
+				<label for="summary" style="font-size: 20px;">Summary</label>
+				<p id="summary">{{ summary }}</p>
+			</td>
+		</tr>
+	</table>
+	</form>
+
+  <!-- Start your project here-->
+ <!--  <div class="md-form mb-4 pink-textarea active-pink-textarea" style="width: 30%; margin-top: 15%; margin-left: 20px;">
+	  <i class="fas fa-angle-double-right prefix"></i>
+	  <textarea type="text" id="form21" class="md-textarea form-control" rows="5"></textarea>
+	  <label for="form21" style="font-size: 20px;">Enter Text Article</label>
+  </div> -->
+  <!-- /Start your project here-->
+
+  <!-- SCRIPTS -->
+  <!-- JQuery -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="{{ url_for('static', filename='js/mdb.min.js') }}"></script>
+</body>
+
+</html>
