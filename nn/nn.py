@@ -2,6 +2,8 @@ import os
 import re
 import nltk
 import numpy as np
+from numpy.random import seed
+seed(1)
 import sys, gensim, logging, codecs, gzip
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize as wt
@@ -16,10 +18,104 @@ from os.path import exists
 import pickle
 stopwords = stopwords.words('english')
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 PATH = "C:\\Users\\Bhushan Borole\\Desktop\\Coding\\Projects\\Text-Summarization\\dataset\\cnn"
 gensim_model_name = 'w2v'
+
+
+class LSTM():
+	def __init__(self, training_data):
+		self.training_data = training_data
+		self.batch_size = 32
+		self.epochs = 20
+		self.hidden_units = 300
+		self.learning_rate = 0.005
+		self.clip_norm = 2.0
+		self.encoder_shape = np.shape(training_data['article'][0])
+		self.decoder_shape = np.shape(training_data['summaries'][0])
+
+	def encode_decoder(self, data):
+		print('Encoder_Decoder LSTM...')
+
+		"""__encoder___"""
+		encoder_inputs = Input(shape=self.encoder_shape)
+
+		encoder_LSTM = LSTM(self.hidden_units,dropout_U=0.2, 
+							dropout_W=0.2, return_sequences=True,
+							return_state=True)
+		encoder_LSTM_rev = LSTM(self.hidden_units,return_state=True,
+								return_sequences=True, dropout_U=0.05,
+								dropout_W=0.05, go_backwards=True)
+
+		encoder_outputs, state_h, state_c = encoder_LSTM(encoder_inputs)
+		encoder_outputsR, state_hR, state_cR = encoder_LSTM_rev(encoder_inputs)
+
+		state_hfinal=Add()([state_h,state_hR])
+		state_cfinal=Add()([state_c,state_cR])
+		encoder_outputs_final = Add()([encoder_outputs,encoder_outputsR])
+
+		encoder_states = [state_hfinal,state_cfinal]
+
+		"""____decoder___"""
+		decoder_inputs = Input(shape=(None,self.decoder_shape[1]))
+		decoder_LSTM = LSTM(self.hidden_units, return_sequences=True,
+							dropout_U=0.2, dropout_W=0.2, return_state=True)
+		decoder_outputs, _, _ = decoder_LSTM(self.decoder_inputs, initial_state=encoder_states)
+
+		#Pull out XGBoost, (I mean attention)
+		attention = TimeDistributed(Dense(1, activation = 'tanh'))(encoder_outputs_final)
+		attention = Flatten()(attention)
+		attention = Multiply()([decoder_outputs, attention])
+		attention = Activation('softmax')(attention)
+		attention = Permute([2, 1])(attention)
+
+		decoder_dense = Dense(self.decoder_shape[1],activation='softmax')
+		decoder_outputs = decoder_dense(attention)
+
+		model= Model(inputs=[encoder_inputs,decoder_inputs], outputs=decoder_outputs)
+		print('-------------Model Summary------------')
+		print(model.summary())
+		print('-'*40)
+
+		rmsprop = RMSprop(lr=self.learning_rate, clipnorm=self.clip_norm)
+		model.compile(loss='categorical_crossentropy', optimizer=rmsprop, metrics=['accuracy'])
+
+		x_train, x_test, y_train, y_test = tts(data["article"],data["summaries"], test_size=0.20)
+		history= model.fit(x=[x_train,y_train],
+		      y=y_train,
+		      batch_size=self.batch_size,
+		      epochs=self.epochs,
+		      verbose=1,
+		      validation_data=([x_test,y_test], y_test))
+		print('-------------Model Summary------------')
+		print(model.summary())
+		print('-'*40)
+
+		"""_________________inference mode__________________"""
+		encoder_model_inf = Model(encoder_inputs,encoder_states)
+
+		decoder_state_input_H = Input(shape=(self.encoder_shape[0],))
+		decoder_state_input_C = Input(shape=(self.encoder_shape[0],)) 
+		decoder_state_inputs = [decoder_state_input_H, decoder_state_input_C]
+		decoder_outputs, decoder_state_h, decoder_state_c = decoder_LSTM(decoder_inputs,
+		                                                             initial_state=decoder_state_inputs)
+		decoder_states = [decoder_state_h, decoder_state_c]
+		decoder_outputs = decoder_dense(decoder_outputs)
+
+		decoder_model_inf= Model([decoder_inputs]+decoder_state_inputs,
+		                 [decoder_outputs]+decoder_states)
+
+		scores = model.evaluate([x_test,y_test],y_test, verbose=1)
+
+
+		print('LSTM test scores:', scores)
+		print('-------------Model Summary------------')
+		print(model.summary())
+		print('-'*40)
+		return model,encoder_model_inf,decoder_model_inf,history
 
 class Word2vec():
 	def __init__(self, data):
@@ -50,6 +146,12 @@ class Word2vec():
 		with open(gensim_model_name, 'wb') as model_file:
 			pickle.dump(model, model_file)
 
+	def update_model(self, model, corpus):
+		logger.info('Updating model')
+		model.train(corpus, total_examples=len(corpus), epochs=25)
+		self.save_gensim_model(model)
+		return model
+
 	def word2vec_model(self, corpus):
 		emb_size = 300
 		model_type = {"skip_gram":1,"CBOW":0}
@@ -67,7 +169,7 @@ class Word2vec():
 		self.save_gensim_model(model)
 		model.train(corpus,total_examples=len(corpus),epochs=epochs)
 		
-		print("Model deployed")
+		logger.info('Model deployed')
 		return model
 	'''
 	def update(self, model, corpus, mincount=3):
@@ -138,7 +240,8 @@ class Word2vec():
 		for sent in corpus:
 			for word in wt(' '.join(sent)):
 				all_words.append(word.lower())
-		print(len(set(all_words)), "unique words in corpus")
+		#print(len(set(all_words)), "unique words in corpus")
+		logger.info(str(len(all_words)) + 'unique words in corpus')
 		#maxcorp=int(input("Enter desired number of vocabulary: "))
 		maxcorp = int(len(set(all_words)) / 1.1)
 		wordcount = Counter(all_words).most_common(maxcorp)
@@ -149,7 +252,8 @@ class Word2vec():
 		    
 		all_words = list(set(all_words))
 
-		print(len(all_words), "unique words in corpus after max corpus cut")
+		#print(len(all_words), "unique words in corpus after max corpus cut")
+		#logger.info(str(len(all_words)) + 'unique words in corpus after max corpus cut')
 		#integer encode
 		#label_encoder = LabelEncoder()
 		#integer_encoded = label_encoder.fit_transform(all_words)
@@ -187,14 +291,11 @@ class Word2vec():
 			training_data["article"].append(art) 
 			training_data["summaries"].append(summ)
 			if i%100==0:
-				print("progress: " + str(((i*100)/len(self.data["articles"]))))
+				logger.info("progress: " + str(((i*100)/len(self.data["articles"]))))
 			i+=1
 		
 		print('\007')
 		return training_data
-
-
-
 
 
 
@@ -257,19 +358,14 @@ class LoadDataset():
 	def load_dataset(self):
 		file_names = self.get_file_names(self.path, self.dataset_categories[0])
 		for i in range(len(file_names[:1000])):
-			
-			#f = open(r"cleaned_dataset\\"+self.dataset_categories[0]+'\\'+file_names[i], 'w')
 			if i%2 == 0:
-				#f.write(self.clean_text(self.parse_text(self.path, self.dataset_categories[0], file_names[i])))
-				#print(self.parse_text(self.path, self.dataset_categories[0], file_names[i]))
 				self.data['articles'].append(self.parse_text(self.path, self.dataset_categories[0], file_names[i]))
 			else:
-				#f.write(self.clean_text(self.parse_text(self.path, self.dataset_categories[0], file_names[i])))
 				self.data['summaries'].append(self.parse_text(self.path, self.dataset_categories[0], file_names[i]))
 		
 		#self.printArticlesum(1)
-		print('data loaded')
-		print('Length of data: {}'.format(len(self.data['articles']) + len(self.data['articles'])))
+		logger.info('data loaded from {} to {}'.format(x, y))
+		logger.info('Length of data: {}'.format(len(self.data['articles']) + len(self.data['articles'])))
 		return self.data
 
 
