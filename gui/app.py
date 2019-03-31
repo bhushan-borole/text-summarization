@@ -16,8 +16,11 @@ def summarize():
 	
 	if request.method == 'POST':
 		text = request.form['text']
+		num_sent = None
+		if request.form['num_sentences']:
+			num_sent = request.form['num_sentences']
 		summarizer = Extractive_Summarizer()
-		summary = summarizer.summarize(text)
+		summary = summarizer.summarize(text, num_sent=num_sent)
 		return render_template("index.html", summary=summary)
 	else:
 		return render_template("index.html")
