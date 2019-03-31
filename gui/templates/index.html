@@ -40,6 +40,13 @@
 				    <div class="md-form" style="width: 40%; margin-left: 10%">
 						<input placeholder="Enter Number of Sentences: " type="Number" id="num_sentences" name="num_sentences" class="form-control">
 					</div>
+					<div class="md-form" style="width: 40%; margin-left: 10%">
+						<select class="browser-default custom-select" id="type_of_summ" name="type_of_summ">
+							<option value="luhn" disabled selected>Choose method of Summarization</option>
+							<option value="luhn">Luhn Algorithm</option>
+							<option value="textrank">Text Rank Algorithm</option>
+						</select>
+					</div>
 				</td>
 				<td>
 					<input type="submit" name="submit" value="submit" class="btn btn-primary">

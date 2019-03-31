@@ -5,7 +5,7 @@ from nltk import sent_tokenize, word_tokenize
 stopwords = nltk.corpus.stopwords.words('english')
 
 
-class Extractive_Summarizer():
+class Luhn_Summarizer():
     def __init__(self):
         pass
 
@@ -69,15 +69,29 @@ class Extractive_Summarizer():
             return 'Too short to summarize'
 
 
-if __name__ == '__main__':
-    summarizer = Extractive_Summarizer()
-    with open('article.txt', 'r+') as f:
-        article = f.read()
+def luhn_summarize(text, num_sent=None):
+    summarizer = Luhn_Summarizer()
+    summary = summarizer.summarize(text, num_sent=num_sent)
+    return summary
 
-    summary = summarizer.summarize(article)
+
+if __name__ == '__main__':
+    text = '''
+    Diabetes is a chronic disease or group of metabolic disease where a person suffers from an extended level of blood glucose in the body, 
+    which is either the insulin production is inadequate, or because the body’s cells do not respond properly to insulin. 
+    The constant hyperglycemia of diabetes is related to long-haul harm, brokenness, and failure of various organs, 
+    particularly the eyes, kidneys, nerves, heart, and veins. The objective of this research is to make use of significant features, 
+    design a prediction algorithm using Machine learning and find the optimal classifier to give the closest result 
+    comparing to clinical outcomes. The proposed method aims to focus on selecting the attributes that ail in early detection 
+    of Diabetes Miletus using Predictive analysis. The result shows the decision tree algorithm and the Random forest has the 
+    highest specificity of 98.20% and 98.00%, respectively holds best for the analysis of diabetic data. Naïve Bayesian outcome 
+    states the best accuracy of 82.30%. The research also generalizes the selection of optimal features from dataset to improve 
+    the classification accuracy.
+    '''
+    summary = luhn_summarize(article)
     print(summary)
 
-		
+        
 
 
 
