@@ -18,25 +18,21 @@ def summarize():
     if request.method == 'POST':
         text = request.form['text']
         num_sent = None
-        type_of_summary = None
         if request.form['num_sentences']:
             num_sent = request.form['num_sentences']
 
-        try: 
-            if request.form['type_of_summ'] in type_of_summaries:
-                type_of_summary = request.form['type_of_summ']
-                if type_of_summary == 'luhn':
-                    summary = luhn_summarize(text, num_sent=num_sent)
-                    return render_template("index.html", summary=summary)
-
-                elif type_of_summary == 'textrank':
-                    summary = textrank_summarize(text, num_sent=num_sent)
-                    return render_template("index.html", summary=summary)
-            else:
+        if request.form['type_of_summ'] in type_of_summaries:
+            type_of_summary = request.form['type_of_summ']
+            if type_of_summary == 'luhn':
                 summary = luhn_summarize(text, num_sent=num_sent)
                 return render_template("index.html", summary=summary)
-        except:
-            flash('Some fields not selected')
+
+            elif type_of_summary == 'textrank':
+                summary = textrank_summarize(text, num_sent=num_sent)
+                return render_template("index.html", summary=summary)
+        else:
+            summary = luhn_summarize(text, num_sent=num_sent)
+            return render_template("index.html", summary=summary)
     else:
     	return render_template("index.html")
 

@@ -105,8 +105,8 @@ def textrank_summarize(text, num_sent=None):
     if num_sent:
         if int(num_sent) < original_length:
             summary = text_rank.textrank(sentences, n_top=int(num_sent))
-        elif original_length > 5:
-            summary = text_rank.textrank(sentences, n_top=5)
+        elif original_length > 10:
+            summary = text_rank.textrank(sentences, n_top=10)
         else:
             return 'Too short to summarize'
     summary = ' '.join([' '.join(summ) for summ in summary])

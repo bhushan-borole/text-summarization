@@ -34,14 +34,14 @@
 				<td style="width: 45%">
 					<div class="md-form mb-4 pink-textarea active-pink-textarea" style="width: 80%; margin-left: 50px;">
 					    <i class="fas fa-angle-double-right prefix"></i>
-					    <textarea type="text" id="text" name="text" class="md-textarea form-control" rows="5"></textarea>
+					    <textarea type="text" id="text" name="text" class="md-textarea form-control" rows="5" required></textarea>
 					    <label for="form21" style="font-size: 20px;">Enter Text Article</label>
 				    </div>
 				    <div class="md-form" style="width: 40%; margin-left: 10%">
 						<input placeholder="Enter Number of Sentences: " type="Number" id="num_sentences" name="num_sentences" class="form-control">
 					</div>
 					<div class="md-form" style="width: 40%; margin-left: 10%">
-						<select class="browser-default custom-select" id="type_of_summ" name="type_of_summ">
+						<select class="browser-default custom-select" id="type_of_summ" name="type_of_summ" required>
 							<option value="luhn" disabled selected>Choose method of Summarization</option>
 							<option value="luhn">Luhn Algorithm</option>
 							<option value="textrank">Text Rank Algorithm</option>
@@ -53,8 +53,8 @@
 				</td>			
 			
 			<td style="padding-left: 50px;padding-bottom: 80px;">
-				<label for="summary" style="font-size: 20px;">Summary</label>
-				<p id="summary">{{ summary }}</p>
+				<label for="summary" style="font-size: 25px;">Summary</label>
+				<p id="summary" style="font-size: 18px">{{ summary }}</p>
 			</td>
 		</tr>
 	</table>
