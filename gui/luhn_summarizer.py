@@ -2,7 +2,6 @@
 import re
 import nltk
 from nltk import sent_tokenize, word_tokenize
-from gensim.summarization import summarize
 stopwords = nltk.corpus.stopwords.words('english')
 
 
