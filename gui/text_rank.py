@@ -90,9 +90,7 @@ class TextRank():
         # Sort the sentence ranks
         ranked_sentence_indexes = [item[0] for item in sorted(enumerate(sentence_ranks), key=lambda item: -item[1])]
         #print(ranked_sentence_indexes)
-        print(n_top)
         selected_sentences = sorted(ranked_sentence_indexes[:n_top])
-        print(selected_sentences)
         summary = itemgetter(*selected_sentences)(sentences)
         return summary
 

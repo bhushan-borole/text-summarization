@@ -2,13 +2,13 @@
 import re
 import nltk
 from nltk import sent_tokenize, word_tokenize
+from gensim.summarization import summarize
 stopwords = nltk.corpus.stopwords.words('english')
 
 
 class Luhn_Summarizer():
     def __init__(self):
         pass
-
 
     def clean_and_tokenize(self, article_text):
         # Removing Square Brackets and Extra Spaces
@@ -22,7 +22,6 @@ class Luhn_Summarizer():
         formatted_article_text = re.sub('[^a-zA-Z]', ' ', article_text )
         formatted_article_text = re.sub(r'\s+', ' ', formatted_article_text)
         return sentences, formatted_article_text
-
 
     def find_word_frequencies(self, cleaned_text):
         word_frequencies = {}
@@ -40,7 +39,6 @@ class Luhn_Summarizer():
 
         return word_frequencies
 
-
     def calculate_sentence_scores(self, sentences, word_frequencies):
         sentence_scores = {}
         for sent in sentences:
@@ -53,13 +51,11 @@ class Luhn_Summarizer():
                             sentence_scores[sent] += word_frequencies[word]
         return sentence_scores
 
-
     def summarize(self, article, num_sent=None):
         sentences, cleaned_text = self.clean_and_tokenize(article)
         original_length = len(sentences)
         word_freq = self.find_word_frequencies(cleaned_text)
         sentence_scores = sorted(self.calculate_sentence_scores(sentences, word_freq), reverse=True)
-        print(original_length)
         if num_sent:
             if int(num_sent) < original_length:
                 return ' '.join(sentence_scores[:int(num_sent)])
@@ -88,7 +84,7 @@ if __name__ == '__main__':
     states the best accuracy of 82.30%. The research also generalizes the selection of optimal features from dataset to improve 
     the classification accuracy.
     '''
-    summary = luhn_summarize(article)
+    summary = luhn_summarize(text)
     print(summary)
 
         
